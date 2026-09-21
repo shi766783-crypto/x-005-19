@@ -4,6 +4,7 @@ import { useDashboard } from '../composables/useDashboard'
 import { useToolStore } from '../stores/useToolStore'
 import { useMaterialStore } from '../stores/useMaterialStore'
 import { useProjectStore } from '../stores/useProjectStore'
+import { useWorkHours } from '../composables/useWorkHours'
 import { TOOL_CATEGORIES, MATERIAL_CATEGORIES } from '../types'
 import StatCard from '../components/StatCard.vue'
 
@@ -11,6 +12,7 @@ const { stats } = useDashboard()
 const toolStore = useToolStore()
 const materialStore = useMaterialStore()
 const projectStore = useProjectStore()
+const { totals, majorProjects } = useWorkHours()
 
 const toolByCategory = computed(() =>
   TOOL_CATEGORIES.map((c) => ({
@@ -67,6 +69,43 @@ const materialByCategory = computed(() =>
       </section>
     </div>
 
+    <section class="card work-hours-card" @click="$router.push({ name: 'work-hours' })">
+      <div class="work-hours-head">
+        <div class="section-title" style="margin-bottom: 0">工时偏差概览</div>
+        <el-button text type="primary">查看完整统计<el-icon class="el-icon--right"><ArrowRight /></el-icon></el-button>
+      </div>
+      <template v-if="totals.trackedCount">
+        <div class="work-hours-body">
+          <div class="wh-item">
+            <span class="muted">预计总工时</span>
+            <strong>{{ totals.estimatedTotal }}h</strong>
+          </div>
+          <el-icon class="wh-arrow"><Right /></el-icon>
+          <div class="wh-item">
+            <span class="muted">实际总工时</span>
+            <strong>{{ totals.actualTotal }}h</strong>
+          </div>
+          <div class="wh-item">
+            <span class="muted">整体偏差</span>
+            <strong :class="totals.diff > 0 ? 'diff-over' : 'diff-under'">
+              {{ totals.diff > 0 ? '+' : '' }}{{ Math.round(totals.diff * 10) / 10 }}h
+              （{{ Math.round(totals.ratio * 100) }}%）
+            </strong>
+          </div>
+          <div class="wh-item">
+            <el-tag v-if="totals.majorCount" type="danger" size="small">{{ totals.majorCount }} 个项目比预想费时</el-tag>
+            <el-tag v-else type="success" size="small">无明显偏差</el-tag>
+          </div>
+        </div>
+        <div v-if="majorProjects.length" class="wh-major muted">
+          <el-icon color="#f56c6c"><WarningFilled /></el-icon>
+          {{ majorProjects.slice(0, 3).map((p) => p.name).join('、') }}{{ majorProjects.length > 3 ? ' 等' : '' }}
+          实际工时明显超出预计
+        </div>
+      </template>
+      <div v-else class="muted" style="padding: 8px 0">暂无实际工时记录，完成项目后填写「实际用时」即可生成偏差统计</div>
+    </section>
+
     <section class="card">
       <div class="section-title">进行中的项目</div>
       <el-table v-if="projectStore.inProgressProjects.value.length" :data="projectStore.inProgressProjects.value" size="small" border>
@@ -116,5 +155,43 @@ const materialByCategory = computed(() =>
 }
 .dist-row .el-progress {
   flex: 1;
+}
+.work-hours-card {
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+.work-hours-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.work-hours-body {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.wh-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 15px;
+}
+.wh-arrow {
+  color: var(--text-secondary);
+}
+.diff-over {
+  color: var(--danger);
+}
+.diff-under {
+  color: var(--success);
+}
+.wh-major {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 13px;
 }
 </style>

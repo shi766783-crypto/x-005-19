@@ -7,6 +7,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/projects', name: 'projects', component: () => import('../views/ProjectsView.vue'), meta: { title: 'DIY 项目' } },
   { path: '/projects/:id', name: 'project-detail', component: () => import('../views/ProjectDetailView.vue'), meta: { title: '项目详情' } },
   { path: '/dashboard', name: 'dashboard', component: () => import('../views/DashboardView.vue'), meta: { title: '数据看板' } },
+  { path: '/work-hours', name: 'work-hours', component: () => import('../views/WorkHoursView.vue'), meta: { title: '工时统计' } },
   { path: '/leaderboard', name: 'leaderboard', component: () => import('../views/LeaderboardView.vue'), meta: { title: '排行榜' } },
   { path: '/profile', name: 'profile', component: () => import('../views/ProfileView.vue'), meta: { title: '个人中心' } },
 ]
